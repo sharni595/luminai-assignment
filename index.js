@@ -1,7 +1,5 @@
 const puppeteer = require('puppeteer');
 
-
-
 async function completeForm(stockName, percentChange, unixTime) {
     const browser = await puppeteer.launch({
         headless: false,
@@ -12,9 +10,16 @@ async function completeForm(stockName, percentChange, unixTime) {
     await page.goto('https://forms.zohopublic.in/developers/form/TestResponses/formperma/-gq-UT1RjqASnGgBsW-M8MmPm8e3YLhcyFam06v2piE');
 
     //Type into search boxes
-    await page.type('input[name="SingleLine"]', stockName);
-    await page.type('input[name="SingleLine1"]', percentChange);
-    await page.type('input[name="SingleLine2"]', unixTime);
+    try {
+        await page.type('input[name="SingleLine"]', stockName);
+        await page.type('input[name="SingleLine1"]', percentChange);
+        await page.type('input[name="SingleLine2"]', unixTime);
+    } catch (e) {
+        if (e instanceof TimeoutError) {
+            console.log('timeout:', e)
+        }
+    }
+
 
     //Press submit button
     const submit = 'button[elname="submit"]'
@@ -32,10 +37,15 @@ async function init() {
 
     //Click NASDAQ button to show relevant top gainers
     const nasdaqButton = '.MarketMoversMenu-marketOption'
-    await page.waitForSelector(nasdaqButton);
-    const selectors = await page.$$(nasdaqButton)
-    await selectors[1].click()
-
+    try {
+        await page.waitForSelector(nasdaqButton);
+        const selectors = await page.$$(nasdaqButton)
+        await selectors[1].click()
+    } catch (e) {
+        if (e instanceof TimeoutError) {
+            console.log('timeout:', e)
+        }
+    }
 
     //Get all Top Gainers
     const marketTable = '.MarketTop-topTable';
